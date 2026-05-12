@@ -20,7 +20,7 @@ from sklearn.ensemble import RandomForestRegressor
 age_df = all_data[['Age', 'Pclass','Sex','Parch','SibSp']]
 
 # ラベル特徴量をワンホットエンコーディング
-age_df=pd.get_dummies(age_all_data)
+age_df=pd.get_dummies(age_df)
 
 # 学習データとテストデータに分離し、numpyに変換
 known_age = age_df[age_df.Age.notnull()].values  
