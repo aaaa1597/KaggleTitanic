@@ -62,11 +62,11 @@ all_data.loc[(all_data.Age.isnull()), 'Age'] = predictedAges
 df = all_data[['Survived','Pclass','Sex','Age','Fare','Embarked','Title','Family_label']]
 
 ####### 本番モデル用のOne-Hot Encoding
-df = pd.get_dummies(df)
+all_data = pd.get_dummies(df)
 
 ##### 元に戻す
-train_data = df[df['Survived'].notnull()]
-test_data  = df[df['Survived'].isnull()].drop('Survived',axis=1)
+train_data = all_data[all_data['Survived'].notnull()]
+test_data  = all_data[all_data['Survived'].isnull()].drop('Survived',axis=1)
 
 ##### 学習データを準備(データフレームをnumpyに変換)
 X      = train_data.values[:,1:]  
@@ -100,7 +100,7 @@ print('mean_std = ', np.std(cv_result['test_score']))
 mask= select.get_support()
 
 # 項目のリスト
-list_col = list(df.columns[1:])
+list_col = list(all_data.columns[1:])
 
 # 項目別の採用可否の一覧表
 for i, j in enumerate(list_col):
