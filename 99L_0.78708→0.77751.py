@@ -64,13 +64,13 @@ df = all_data[['Survived','Pclass','Sex','Age','Fare','Embarked','Title','Family
 ####### 本番モデル用のOne-Hot Encoding
 df = pd.get_dummies(df)
 
-# データセットを trainとtestに分割
-train = df[df['Survived'].notnull()]
+##### 元に戻す
+train_data = df[df['Survived'].notnull()]
 test = df[df['Survived'].isnull()].drop('Survived',axis=1)
 
 ##### 学習データを準備(データフレームをnumpyに変換)
-X      = train.values[:,1:]  
-y      = train.values[:,0].astype(int)
+X      = train_data.values[:,1:]  
+y      = train_data.values[:,0].astype(int)
 test_x = test.values
 
 # ----------- 推定モデル構築 ---------------
