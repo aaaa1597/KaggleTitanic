@@ -61,16 +61,16 @@ all_data.loc[(all_data.Age.isnull()), 'Age'] = predictedAges
 # 推定に使用する項目を指定
 df = all_data[['Survived','Pclass','Sex','Age','Fare','Embarked','Title','Family_label']]
 
-# ラベル特徴量をワンホットエンコーディング
+####### 本番モデル用のOne-Hot Encoding
 df = pd.get_dummies(df)
 
 # データセットを trainとtestに分割
 train = df[df['Survived'].notnull()]
 test = df[df['Survived'].isnull()].drop('Survived',axis=1)
 
-# データフレームをnumpyに変換
-X = train.values[:,1:]  
-y = train.values[:,0].astype(int)
+##### 学習データを準備(データフレームをnumpyに変換)
+X      = train.values[:,1:]  
+y      = train.values[:,0].astype(int)
 test_x = test.values
 
 # ----------- 推定モデル構築 ---------------
