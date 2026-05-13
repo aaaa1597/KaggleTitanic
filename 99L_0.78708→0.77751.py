@@ -3,10 +3,10 @@ import numpy as np
 
 ##### データ読み込み
 train_data = pd.read_csv('/kaggle/input/competitions/titanic/train.csv')
-test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
+test_data2 = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
 
 ##### 前準備
-all_data = pd.concat([train_data, test_data], ignore_index=True)
+all_data = pd.concat([train_data, test_data2], ignore_index=True)
 
 ##### 特徴量エンジニアリング(家族人数)
 # Family = SibSp + Parch + 1 を特徴量とし、グルーピング
@@ -66,12 +66,12 @@ df = pd.get_dummies(df)
 
 ##### 元に戻す
 train_data = df[df['Survived'].notnull()]
-test = df[df['Survived'].isnull()].drop('Survived',axis=1)
+test_data  = df[df['Survived'].isnull()].drop('Survived',axis=1)
 
 ##### 学習データを準備(データフレームをnumpyに変換)
 X      = train_data.values[:,1:]  
 y      = train_data.values[:,0].astype(int)
-test_x = test.values
+test_x = test_data.values
 
 # ----------- 推定モデル構築 ---------------
 from sklearn.feature_selection import SelectKBest
@@ -111,7 +111,7 @@ X_selected = select.transform(X)
 print('X.shape={}, X_selected.shape={}'.format(X.shape, X_selected.shape))
 
 # ----- Submit dataの作成　------- 
-PassengerId=test_data['PassengerId']
+PassengerId=test_data2['PassengerId']
 predictions = pipeline.predict(test_x)
 submission = pd.DataFrame({"PassengerId": PassengerId, "Survived": predictions.astype(np.int32)})
 submission.to_csv("submission-99L-004.csv", index=False)
