@@ -71,7 +71,7 @@ all_data = pd.get_dummies(all_data)
 
 ##### 元に戻す
 train_data = all_data[all_data['Survived'].notnull()]
-test_data  = all_data[all_data['Survived'].isnull()].drop('Survived',axis=1)
+test_data  = all_data[all_data['Survived'].isnull()]
 
 ### ----------- 002
 ### Index(['Survived', 'Pclass', 'Age', 'Fare', 'Family_label', 'Sex_female', 'Sex_male', 'Embarked_C', 'Embarked_Q', 'Embarked_S', 'Title_Master', 'Title_Miss', 'Title_Mr', 'Title_Mrs', 'Title_Officer', 'Title_Royalty'], dtype='object')
@@ -139,7 +139,7 @@ submission = pd.DataFrame({
 })
 
 ##### 提出ファイル出力
-submission.to_csv("submission-99L-004.csv", index=False)
+submission.to_csv("submission-99L-005.csv", index=False)
 
 ##### 完了
-print("submission-99L-004.csv を作成しました")
+print("submission-99L-005.csv を作成しました")
