@@ -3,7 +3,7 @@ import numpy as np
 
 ##### データ読み込み
 train_data = pd.read_csv('/kaggle/input/competitions/titanic/train.csv')
-test_data = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
+test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
 
 ##### 前準備
 all_data = pd.concat([train_data, test_data], ignore_index=True)
