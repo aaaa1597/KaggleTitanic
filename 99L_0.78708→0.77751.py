@@ -29,7 +29,6 @@ all_data['Fare']=all_data['Fare'].fillna(fare)
 
 ##################### AgeをRandomForestRegressorで推定 ここから
 ##### Age を Pclass, Sex, Parch, SibSp からランダムフォレストで推定
-from sklearn.ensemble import RandomForestRegressor
 
 # 推定に使用する項目を指定
 age_df = all_data[['Age', 'Pclass','Sex','Parch','SibSp']]
@@ -41,13 +40,14 @@ age_df=pd.get_dummies(age_df)
 known_age = age_df[age_df.Age.notnull()].values  
 unknown_age = age_df[age_df.Age.isnull()].values
 
-# 学習データをX, yに分離
-X = known_age[:, 1:]  
-y = known_age[:, 0]
+# 学習データをX_age, y_ageに分離
+X_age = known_age[:, 1:]  
+y_age = known_age[:, 0]
 
 # ランダムフォレストで推定モデルを構築
+from sklearn.ensemble import RandomForestRegressor
 rfr = RandomForestRegressor(random_state=0, n_estimators=100, n_jobs=-1)
-rfr.fit(X, y)
+rfr.fit(X_age, y_age)
 
 # 推定モデルを使って、テストデータのAgeを予測し、補完
 predictedAges = rfr.predict(unknown_age[:, 1::])
