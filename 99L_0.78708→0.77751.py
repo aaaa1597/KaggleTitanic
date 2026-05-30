@@ -9,7 +9,7 @@ test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
 all_data = pd.concat([train_data, test_data], ignore_index=True)
 
 ##### 特徴量エンジニアリング(家族人数)
-all_data['FamilySize']=all_data['SibSp']+all_data['Parch']+1
+all_data['FamilySize'] = all_data['SibSp'] + all_data['Parch'] + 1
 all_data.loc[(all_data['FamilySize']>=2) & (all_data['FamilySize']<=4), 'Family_label'] = 2
 all_data.loc[(all_data['FamilySize']>=5) & (all_data['FamilySize']<=7) | (all_data['FamilySize']==1), 'Family_label'] = 1  # == に注意
 all_data.loc[(all_data['FamilySize']>=8), 'Family_label'] = 0
