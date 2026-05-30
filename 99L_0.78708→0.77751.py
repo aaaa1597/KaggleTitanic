@@ -28,11 +28,11 @@ fare=all_data.loc[(all_data['Embarked'] == 'S') & (all_data['Pclass'] == 3), 'Fa
 all_data['Fare']=all_data['Fare'].fillna(fare)
 
 ##################### AgeをRandomForestRegressorで推定 ここから
-# 推定に使用する項目を指定
-age_pred_data = all_data[['Age', 'Pclass','Sex','Parch','SibSp']]
+##### 推定に使用する項目を指定
+age_pred_data = all_data[['Age', 'Pclass', 'Sex', 'SibSp', 'Parch']]
 
-# ラベル特徴量をワンホットエンコーディング
-age_pred_data=pd.get_dummies(age_pred_data)
+##### ラベル特徴量をOne-Hotエンコーディング
+age_pred_data = pd.get_dummies(age_pred_data)
 
 ##### Ageがわかっているデータに分離し、numpyに変換
 age_known  = age_pred_data[age_pred_data['Age'].notnull()].values
