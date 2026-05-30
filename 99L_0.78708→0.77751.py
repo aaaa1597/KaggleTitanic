@@ -28,30 +28,30 @@ fare=all_data.loc[(all_data['Embarked'] == 'S') & (all_data['Pclass'] == 3), 'Fa
 all_data['Fare']=all_data['Fare'].fillna(fare)
 
 ##################### AgeをRandomForestRegressorで推定 ここから
-##### Age を Pclass, Sex, Parch, SibSp からランダムフォレストで推定
-
 # 推定に使用する項目を指定
-age_df = all_data[['Age', 'Pclass','Sex','Parch','SibSp']]
+age_pred_data = all_data[['Age', 'Pclass','Sex','Parch','SibSp']]
 
 # ラベル特徴量をワンホットエンコーディング
-age_df=pd.get_dummies(age_df)
+age_pred_data=pd.get_dummies(age_pred_data)
 
-# 学習データとテストデータに分離し、numpyに変換
-known_age = age_df[age_df.Age.notnull()].values  
-unknown_age = age_df[age_df.Age.isnull()].values
+##### Ageがわかっているデータに分離し、numpyに変換
+age_known  = age_pred_data[age_pred_data.Age.notnull()].values
+age_unknown= age_pred_data[age_pred_data.Age.isnull()].values
 
-# 学習データをX_age, y_ageに分離
-X_age = known_age[:, 1:]  
-y_age = known_age[:, 0]
+##### 学習用データをX_age, y_ageに分離
+X_age = age_known[:, 1:] # Age以外の特徴量
+y_age = age_known[:, 0]  # Age(目的変数)
 
-# ランダムフォレストで推定モデルを構築
+# ランダムフォレスト(回帰)で推定モデルを構築
 from sklearn.ensemble import RandomForestRegressor
 rfr = RandomForestRegressor(random_state=0, n_estimators=100, n_jobs=-1)
 rfr.fit(X_age, y_age)
 
-# 推定モデルを使って、テストデータのAgeを予測し、補完
-predictedAges = rfr.predict(unknown_age[:, 1::])
-all_data.loc[(all_data.Age.isnull()), 'Age'] = predictedAges 
+##### 欠損値のAge予測実行
+predicted_ages = rfr.predict(age_unknown[:, 1::])
+
+##### 元のall_dataに補完
+all_data.loc[(all_data.Age.isnull()), 'Age'] = predicted_ages
 #####################AgeをRandomForestRegressorで推定 ここまで
 
 ####### 本番モデル用のOne-Hot Encoding
