@@ -9,6 +9,12 @@ test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
 test_data['Survived'] = np.nan
 df = pd.concat([train_data, test_data], ignore_index=True, sort=False)
 
+##### 特徴量エンジニアリング(家族人数)
+df['Family'] = df['SibSp'] + df['Parch'] + 1
+df.loc[(df['Family']>=2) & (df['Family']<=4), 'Family_label'] = 2
+df.loc[(df['Family']>=5) & (df['Family']<=7) | (df['Family']==1), 'Family_label'] = 1  # == に注意
+df.loc[(df['Family']>=8), 'Family_label'] = 0
+
 ##### 特徴量エンジニアリング(敬称抽出)
 df['Title'] = df['Name'].map(lambda x: x.split(', ')[1].split('. ')[0])
 df['Title'].replace(['Capt', 'Col', 'Major', 'Dr', 'Rev'], 'Officer', inplace=True)
@@ -22,39 +28,31 @@ df['Title'].replace(['Jonkheer'], 'Master', inplace=True)
 fare=df.loc[(df['Embarked'] == 'S') & (df['Pclass'] == 3), 'Fare'].median()
 df['Fare']=df['Fare'].fillna(fare)
 
-
 ##################### AgeをRandomForestRegressorで推定 ここから
-# Age を Pclass, Sex, Parch, SibSp からランダムフォレストで推定
-from sklearn.ensemble import RandomForestRegressor
-
-# 推定に使用する項目を指定
+##### 推定に使用する項目を指定
 age_df = df[['Age', 'Pclass','Sex','Parch','SibSp']]
 
-# ラベル特徴量をワンホットエンコーディング
+##### ラベル特徴量をワンホットエンコーディング
 age_df=pd.get_dummies(age_df)
 
-# 学習データとテストデータに分離し、numpyに変換
+##### 学習データとテストデータに分離し、numpyに変換
 known_age = age_df[age_df.Age.notnull()].values  
 unknown_age = age_df[age_df.Age.isnull()].values
 
-# 学習データをX, yに分離
-X = known_age[:, 1:]  
+##### 学習用データをX, yに分離
+X = known_age[:, 1:]
 y = known_age[:, 0]
 
-# ランダムフォレストで推定モデルを構築
+##### ランダムフォレストで推定モデルを構築
+from sklearn.ensemble import RandomForestRegressor
 rfr = RandomForestRegressor(random_state=0, n_estimators=100, n_jobs=-1)
 rfr.fit(X, y)
 
-# 推定モデルを使って、テストデータのAgeを予測し、補完
+##### 欠損値のAge予測実行
 predictedAges = rfr.predict(unknown_age[:, 1::])
-df.loc[(df.Age.isnull()), 'Age'] = predictedAges 
 
-# 年齢別生存曲線と死亡曲線
-facet = sns.FacetGrid(df[0:890], hue="Survived",aspect=2)
-facet.map(sns.kdeplot,'Age',shade= True)
-facet.set(xlim=(0, df.loc[0:890,'Age'].max()))
-facet.add_legend()
-plt.show()
+##### 元のall_dataに補完
+df.loc[(df.Age.isnull()), 'Age'] = predictedAges 
 #####################AgeをRandomForestRegressorで推定 ここまで
 
 
@@ -88,13 +86,6 @@ df.loc[(df['Survived'].isnull()) & (df['Surname'].apply(lambda x:x in Dead_list)
              ['Sex','Age','Title']] = ['male',28.0,'Mr']
 df.loc[(df['Survived'].isnull()) & (df['Surname'].apply(lambda x:x in Survived_list)),\
              ['Sex','Age','Title']] = ['female',5.0,'Mrs']
-
-# ----------- Family -------------
-# Family = SibSp + Parch + 1 を特徴量とし、グルーピング
-df['Family']=df['SibSp']+df['Parch']+1
-df.loc[(df['Family']>=2) & (df['Family']<=4), 'Family_label'] = 2
-df.loc[(df['Family']>=5) & (df['Family']<=7) | (df['Family']==1), 'Family_label'] = 1  # == に注意
-df.loc[(df['Family']>=8), 'Family_label'] = 0
 
 # ----------- Ticket ----------------
 # 同一Ticketナンバーの人が何人いるかを特徴量として抽出
