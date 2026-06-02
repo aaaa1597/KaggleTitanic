@@ -16,11 +16,11 @@ df.loc[(df['Family']>=8), 'Family_label'] = 0
 
 ##### 特徴量エンジニアリング(敬称抽出)
 df['Title'] = df['Name'].map(lambda x: x.split(', ')[1].split('. ')[0])
+df['Title'].replace(['Mlle'], 'Miss', inplace=True)
+df['Title'].replace(['Mme', 'Ms'], 'Mrs', inplace=True)
+df['Title'].replace(['Jonkheer'], 'Master', inplace=True)
 df['Title'].replace(['Capt', 'Col', 'Major', 'Dr', 'Rev'], 'Officer', inplace=True)
 df['Title'].replace(['Don', 'Sir',  'the Countess', 'Lady', 'Dona'], 'Royalty', inplace=True)
-df['Title'].replace(['Mme', 'Ms'], 'Mrs', inplace=True)
-df['Title'].replace(['Mlle'], 'Miss', inplace=True)
-df['Title'].replace(['Jonkheer'], 'Master', inplace=True)
 
 ##### 特徴量エンジニアリング(Fareの欠損値補完)
 # 欠損値を Embarked='S', Pclass=3 の平均値で補完
@@ -116,7 +116,7 @@ train = df[df['Survived'].notnull()]
 test = df[df['Survived'].isnull()].drop('Survived',axis=1)
 
 ##### 学習データを準備
-X      = train.values[:,1:]  
+X      = train.values[:,1:]
 y      = train.values[:,0].astype(int)
 test_x = test.values
 
