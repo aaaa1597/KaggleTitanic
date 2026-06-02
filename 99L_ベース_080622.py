@@ -29,29 +29,29 @@ df['Fare']=df['Fare'].fillna(fare)
 
 ##################### AgeをRandomForestRegressorで推定 ここから
 ##### 推定に使用する項目を指定
-age_df = df[['Age', 'Pclass','Sex','Parch','SibSp']]
+age_pred_data = df[['Age', 'Pclass', 'Sex', 'SibSp', 'Parch']]
 
-##### ラベル特徴量をワンホットエンコーディング
-age_df=pd.get_dummies(age_df)
+##### ラベル特徴量をOne-Hotエンコーディング
+age_pred_data = pd.get_dummies(age_pred_data)
 
-##### 学習データとテストデータに分離し、numpyに変換
-known_age = age_df[age_df.Age.notnull()].values  
-unknown_age = age_df[age_df.Age.isnull()].values
+##### Ageがわかっているデータとわかってないデータに分離し、numpyに変換
+age_known  = age_pred_data[age_pred_data['Age'].notnull()].values
+age_unknown= age_pred_data[age_pred_data['Age'].isnull()].values
 
 ##### 学習用データをX, yに分離
-X = known_age[:, 1:]
-y = known_age[:, 0]
+X = age_known[:, 1:]
+y = age_known[:, 0]
 
-##### ランダムフォレストで推定モデルを構築
+##### ランダムフォレスト(回帰)で推定モデルを構築
 from sklearn.ensemble import RandomForestRegressor
 rfr = RandomForestRegressor(random_state=0, n_estimators=100, n_jobs=-1)
 rfr.fit(X, y)
 
 ##### 欠損値のAge予測実行
-predictedAges = rfr.predict(unknown_age[:, 1::])
+predictedAges = rfr.predict(age_unknown[:, 1::])
 
 ##### 元のall_dataに補完
-df.loc[(df.Age.isnull()), 'Age'] = predictedAges 
+df.loc[(df['Age'].isnull()), 'Age'] = predictedAges 
 #####################AgeをRandomForestRegressorで推定 ここまで
 
 
