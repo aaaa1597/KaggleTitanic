@@ -38,14 +38,14 @@ age_pred_data = pd.get_dummies(age_pred_data)
 age_known  = age_pred_data[age_pred_data['Age'].notnull()].values
 age_unknown= age_pred_data[age_pred_data['Age'].isnull()].values
 
-##### 学習用データをX, yに分離
-X = age_known[:, 1:]
-y = age_known[:, 0]
+##### 学習用データをX_age, y_ageに分離
+X_age = age_known[:, 1:] # Age以外の特徴量
+y_age = age_known[:, 0]  # Age(目的変数)
 
 ##### ランダムフォレスト(回帰)で推定モデルを構築
 from sklearn.ensemble import RandomForestRegressor
 rfr = RandomForestRegressor(random_state=0, n_estimators=100, n_jobs=-1)
-rfr.fit(X, y)
+rfr.fit(X_age, y_age)
 
 ##### 欠損値のAge予測実行
 predictedAges = rfr.predict(age_unknown[:, 1::])
@@ -116,8 +116,8 @@ train = df[df['Survived'].notnull()]
 test = df[df['Survived'].isnull()].drop('Survived',axis=1)
 
 ##### 学習データを準備
-X = train.values[:,1:]  
-y = train.values[:,0].astype(int)
+X      = train.values[:,1:]  
+y      = train.values[:,0].astype(int)
 test_x = test.values
 
 ##### モデル作成・学習
