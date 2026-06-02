@@ -1,24 +1,29 @@
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
 
-# データセットの読み込み
+##### データ読み込み
 train_data = pd.read_csv('/kaggle/input/competitions/titanic/train.csv')
-test_data = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
+test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
 
-# train_dataとtest_dataの連結
+##### 前準備
 test_data['Survived'] = np.nan
 df = pd.concat([train_data, test_data], ignore_index=True, sort=False)
 
-# dfの情報
-df.info()
+##### 特徴量エンジニアリング(敬称抽出)
+df['Title'] = df['Name'].map(lambda x: x.split(', ')[1].split('. ')[0])
+df['Title'].replace(['Capt', 'Col', 'Major', 'Dr', 'Rev'], 'Officer', inplace=True)
+df['Title'].replace(['Don', 'Sir',  'the Countess', 'Lady', 'Dona'], 'Royalty', inplace=True)
+df['Title'].replace(['Mme', 'Ms'], 'Mrs', inplace=True)
+df['Title'].replace(['Mlle'], 'Miss', inplace=True)
+df['Title'].replace(['Jonkheer'], 'Master', inplace=True)
 
-# Sexと生存率の関係 
-sns.barplot(x='Sex', y='Survived', data=df, palette='Set3')
-plt.show()
+##### 特徴量エンジニアリング(Fareの欠損値補完)
+# 欠損値を Embarked='S', Pclass=3 の平均値で補完
+fare=df.loc[(df['Embarked'] == 'S') & (df['Pclass'] == 3), 'Fare'].median()
+df['Fare']=df['Fare'].fillna(fare)
 
-# ------------ Age ------------
+
+##################### AgeをRandomForestRegressorで推定 ここから
 # Age を Pclass, Sex, Parch, SibSp からランダムフォレストで推定
 from sklearn.ensemble import RandomForestRegressor
 
@@ -50,16 +55,8 @@ facet.map(sns.kdeplot,'Age',shade= True)
 facet.set(xlim=(0, df.loc[0:890,'Age'].max()))
 facet.add_legend()
 plt.show()
+#####################AgeをRandomForestRegressorで推定 ここまで
 
-# ------------ Name --------------
-# Nameから敬称(Title)を抽出し、グルーピング
-df['Title'] = df['Name'].map(lambda x: x.split(', ')[1].split('. ')[0])
-df['Title'].replace(['Capt', 'Col', 'Major', 'Dr', 'Rev'], 'Officer', inplace=True)
-df['Title'].replace(['Don', 'Sir',  'the Countess', 'Lady', 'Dona'], 'Royalty', inplace=True)
-df['Title'].replace(['Mme', 'Ms'], 'Mrs', inplace=True)
-df['Title'].replace(['Mlle'], 'Miss', inplace=True)
-df['Title'].replace(['Jonkheer'], 'Master', inplace=True)
-sns.barplot(x='Title', y='Survived', data=df, palette='Set3')
 
 # ------------ Surname ------------
 # NameからSurname(苗字)を抽出
@@ -91,11 +88,6 @@ df.loc[(df['Survived'].isnull()) & (df['Surname'].apply(lambda x:x in Dead_list)
              ['Sex','Age','Title']] = ['male',28.0,'Mr']
 df.loc[(df['Survived'].isnull()) & (df['Surname'].apply(lambda x:x in Survived_list)),\
              ['Sex','Age','Title']] = ['female',5.0,'Mrs']
-
-# ----------- Fare -------------
-# 欠損値を Embarked='S', Pclass=3 の平均値で補完
-fare=df.loc[(df['Embarked'] == 'S') & (df['Pclass'] == 3), 'Fare'].median()
-df['Fare']=df['Fare'].fillna(fare)
 
 # ----------- Family -------------
 # Family = SibSp + Parch + 1 を特徴量とし、グルーピング
@@ -186,4 +178,7 @@ print('X.shape={}, X_selected.shape={}'.format(X.shape, X_selected.shape))
 PassengerId=test_data['PassengerId']
 predictions = pipeline.predict(test_x)
 submission = pd.DataFrame({"PassengerId": PassengerId, "Survived": predictions.astype(np.int32)})
-submission.to_csv("my_submission.csv", index=False)
+submission.to_csv("submission-99L-0.80622_001.csv", index=False)
+
+##### 完了
+print("submission-99L-0.80622_001.csv を作成しました")
