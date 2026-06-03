@@ -6,30 +6,30 @@ train_data = pd.read_csv('/kaggle/input/competitions/titanic/train.csv')
 test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
 
 ##### 前準備
-df = pd.concat([train_data, test_data], ignore_index=True, sort=False)
+all_data = pd.concat([train_data, test_data], ignore_index=True, sort=False)
 
 ##### 特徴量エンジニアリング(家族人数)
-df['Family'] = df['SibSp'] + df['Parch'] + 1
-df.loc[(df['Family']>=2) & (df['Family']<=4), 'Family_label'] = 2
-df.loc[(df['Family']>=5) & (df['Family']<=7) | (df['Family']==1), 'Family_label'] = 1  # == に注意
-df.loc[(df['Family']>=8), 'Family_label'] = 0
+all_data['Family'] = all_data['SibSp'] + all_data['Parch'] + 1
+all_data.loc[(all_data['Family']>=2) & (all_data['Family']<=4), 'Family_label'] = 2
+all_data.loc[(all_data['Family']>=5) & (all_data['Family']<=7) | (all_data['Family']==1), 'Family_label'] = 1  # == に注意
+all_data.loc[(all_data['Family']>=8), 'Family_label'] = 0
 
 ##### 特徴量エンジニアリング(敬称抽出)
-df['Title'] = df['Name'].map(lambda x: x.split(', ')[1].split('. ')[0])
-df['Title'].replace(['Mlle'], 'Miss', inplace=True)
-df['Title'].replace(['Mme', 'Ms'], 'Mrs', inplace=True)
-df['Title'].replace(['Jonkheer'], 'Master', inplace=True)
-df['Title'].replace(['Capt', 'Col', 'Major', 'Dr', 'Rev'], 'Officer', inplace=True)
-df['Title'].replace(['Don', 'Sir',  'the Countess', 'Lady', 'Dona'], 'Royalty', inplace=True)
+all_data['Title'] = all_data['Name'].map(lambda x: x.split(', ')[1].split('. ')[0])
+all_data['Title'].replace(['Mlle'], 'Miss', inplace=True)
+all_data['Title'].replace(['Mme', 'Ms'], 'Mrs', inplace=True)
+all_data['Title'].replace(['Jonkheer'], 'Master', inplace=True)
+all_data['Title'].replace(['Capt', 'Col', 'Major', 'Dr', 'Rev'], 'Officer', inplace=True)
+all_data['Title'].replace(['Don', 'Sir',  'the Countess', 'Lady', 'Dona'], 'Royalty', inplace=True)
 
 ##### 特徴量エンジニアリング(Fareの欠損値補完)
 # 欠損値を Embarked='S', Pclass=3 の平均値で補完
-fare=df.loc[(df['Embarked'] == 'S') & (df['Pclass'] == 3), 'Fare'].median()
-df['Fare']=df['Fare'].fillna(fare)
+fare=all_data.loc[(all_data['Embarked'] == 'S') & (all_data['Pclass'] == 3), 'Fare'].median()
+all_data['Fare']=all_data['Fare'].fillna(fare)
 
 ##################### AgeをRandomForestRegressorで推定 ここから
 ##### 推定に使用する項目を指定
-age_pred_data = df[['Age', 'Pclass', 'Sex', 'SibSp', 'Parch']]
+age_pred_data = all_data[['Age', 'Pclass', 'Sex', 'SibSp', 'Parch']]
 
 ##### ラベル特徴量をOne-Hotエンコーディング
 age_pred_data = pd.get_dummies(age_pred_data)
@@ -51,24 +51,24 @@ rfr.fit(X_age, y_age)
 predictedAges = rfr.predict(age_unknown[:, 1::])
 
 ##### 元のall_dataに補完
-df.loc[(df['Age'].isnull()), 'Age'] = predictedAges 
+all_data.loc[(all_data['Age'].isnull()), 'Age'] = predictedAges 
 #####################AgeをRandomForestRegressorで推定 ここまで
 
 
 #################### Surname ここから
 ##### NameからSurname(苗字)を抽出
-df['Surname'] = df['Name'].map(lambda name:name.split(',')[0].strip())
+all_data['Surname'] = all_data['Name'].map(lambda name:name.split(',')[0].strip())
 
 ##### 同じSurname(苗字)の出現頻度をカウント(出現回数が2以上なら家族)
-df['FamilyGroup'] = df['Surname'].map(df['Surname'].value_counts()) 
+all_data['FamilyGroup'] = all_data['Surname'].map(all_data['Surname'].value_counts()) 
 
 ##### 家族で16才以下または女性の生存率
-Female_Child_Group=df.loc[(df['FamilyGroup']>=2) & ((df['Age']<=16) | (df['Sex']=='female'))]
+Female_Child_Group=all_data.loc[(all_data['FamilyGroup']>=2) & ((all_data['Age']<=16) | (all_data['Sex']=='female'))]
 Female_Child_Group=Female_Child_Group.groupby('Surname')['Survived'].mean()
 print(Female_Child_Group.value_counts())
 
 ##### 家族で16才超えかつ男性の生存率
-Male_Adult_Group=df.loc[(df['FamilyGroup']>=2) & (df['Age']>16) & (df['Sex']=='male')]
+Male_Adult_Group=all_data.loc[(all_data['FamilyGroup']>=2) & (all_data['Age']>16) & (all_data['Sex']=='male')]
 Male_Adult_List=Male_Adult_Group.groupby('Surname')['Survived'].mean()
 print(Male_Adult_List.value_counts())
 
@@ -81,39 +81,39 @@ print('Dead_list = ', Dead_list)
 print('Survived_list = ', Survived_list)
 
 ##### デッドリストとサバイブリストをSex, Age, Title に反映させる
-df.loc[(df['Survived'].isnull()) & (df['Surname'].apply(lambda x:x in Dead_list    )), ['Sex','Age','Title']] = ['male',28.0,'Mr']
-df.loc[(df['Survived'].isnull()) & (df['Surname'].apply(lambda x:x in Survived_list)), ['Sex','Age','Title']] = ['female',5.0,'Mrs']
+all_data.loc[(all_data['Survived'].isnull()) & (all_data['Surname'].apply(lambda x:x in Dead_list    )), ['Sex','Age','Title']] = ['male',28.0,'Mr']
+all_data.loc[(all_data['Survived'].isnull()) & (all_data['Surname'].apply(lambda x:x in Survived_list)), ['Sex','Age','Title']] = ['female',5.0,'Mrs']
 #################### Surname ここまで
 
 ##### ----------- Ticket ----------------
 ##### 同一Ticketナンバーの人が何人いるかを特徴量として抽出
-Ticket_Count = dict(df['Ticket'].value_counts())
-df['TicketGroup'] = df['Ticket'].map(Ticket_Count)
+Ticket_Count = dict(all_data['Ticket'].value_counts())
+all_data['TicketGroup'] = all_data['Ticket'].map(Ticket_Count)
 
 ##### 生存率で3つにグルーピング
-df.loc[(df['TicketGroup']>=2) & (df['TicketGroup']<=4), 'Ticket_label'] = 2
-df.loc[(df['TicketGroup']>=5) & (df['TicketGroup']<=8) | (df['TicketGroup']==1), 'Ticket_label'] = 1  
-df.loc[(df['TicketGroup']>=11), 'Ticket_label'] = 0
+all_data.loc[(all_data['TicketGroup']>=2) & (all_data['TicketGroup']<=4), 'Ticket_label'] = 2
+all_data.loc[(all_data['TicketGroup']>=5) & (all_data['TicketGroup']<=8) | (all_data['TicketGroup']==1), 'Ticket_label'] = 1  
+all_data.loc[(all_data['TicketGroup']>=11), 'Ticket_label'] = 0
 
 ##### ------------- Cabin ----------------
 ##### Cabinの先頭文字を特徴量とする(欠損値は U )
-df['Cabin'] = df['Cabin'].fillna('Unknown')
-df['Cabin_label']=df['Cabin'].str.get(0)
+all_data['Cabin'] = all_data['Cabin'].fillna('Unknown')
+all_data['Cabin_label']=all_data['Cabin'].str.get(0)
 
 ##### ---------- Embarked ---------------
 ##### 欠損値をSで補完
-df['Embarked'] = df['Embarked'].fillna('S') 
+all_data['Embarked'] = all_data['Embarked'].fillna('S') 
 
 # ------------- 前処理 ---------------
 # 推定に使用する項目を指定
-df = df[['Survived','Pclass','Sex','Age','Fare','Embarked','Title','Family_label','Cabin_label','Ticket_label']]
+all_data = all_data[['Survived','Pclass','Sex','Age','Fare','Embarked','Title','Family_label','Cabin_label','Ticket_label']]
 
 ####### 本番モデル用のOne-Hot Encoding
-df = pd.get_dummies(df)
+all_data = pd.get_dummies(all_data)
 
 ##### 元に戻す
-train = df[df['Survived'].notnull()]
-test = df[df['Survived'].isnull()].drop('Survived',axis=1)
+train = all_data[all_data['Survived'].notnull()]
+test = all_data[all_data['Survived'].isnull()].drop('Survived',axis=1)
 
 ##### 学習データを準備
 X      = train.values[:,1:]
@@ -147,7 +147,7 @@ print('mean_std = ', np.std(cv_result['test_score']))
 mask= select.get_support()
 
 # 項目のリスト
-list_col = list(df.columns[1:])
+list_col = list(all_data.columns[1:])
 
 # 項目別の採用可否の一覧表
 for i, j in enumerate(list_col):
