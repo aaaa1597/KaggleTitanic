@@ -6,7 +6,7 @@ train_data = pd.read_csv('/kaggle/input/competitions/titanic/train.csv')
 test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
 
 ##### 前準備
-all_data = pd.concat([train_data, test_data], ignore_index=True, sort=False)
+all_data = pd.concat([train_data, test_data], ignore_index=True)
 
 ##### 特徴量エンジニアリング(家族人数)
 all_data['Family'] = all_data['SibSp'] + all_data['Parch'] + 1
