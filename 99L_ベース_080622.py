@@ -48,10 +48,10 @@ rfr = RandomForestRegressor(random_state=0, n_estimators=100, n_jobs=-1)
 rfr.fit(X_age, y_age)
 
 ##### Œ‡‘¹’l‚ÌAge—\‘ªÀs
-predictedAges = rfr.predict(age_unknown[:, 1::])
+predicted_ages = rfr.predict(age_unknown[:, 1:])
 
 ##### Œ³‚Ìall_data‚É•âŠ®
-all_data.loc[(all_data['Age'].isnull()), 'Age'] = predictedAges 
+all_data.loc[all_data['Age'].isnull(), 'Age'] = predicted_ages
 #####################Age‚ğRandomForestRegressor‚Å„’è ‚±‚±‚Ü‚Å
 
 
