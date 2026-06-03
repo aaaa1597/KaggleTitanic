@@ -10,9 +10,9 @@ all_data = pd.concat([train_data, test_data], ignore_index=True)
 
 ##### 特徴量エンジニアリング(家族人数)
 all_data['Family'] = all_data['SibSp'] + all_data['Parch'] + 1
-all_data.loc[(all_data['Family']>=2) & (all_data['Family']<=4), 'Family_label'] = 2
-all_data.loc[(all_data['Family']>=5) & (all_data['Family']<=7) | (all_data['Family']==1), 'Family_label'] = 1  # == に注意
-all_data.loc[(all_data['Family']>=8), 'Family_label'] = 0
+all_data.loc[(all_data['Family']>=2) & (all_data['Family']<=4), 'FamilySizeGroup'] = 2
+all_data.loc[(all_data['Family']>=5) & (all_data['Family']<=7) | (all_data['Family']==1), 'FamilySizeGroup'] = 1  # == に注意
+all_data.loc[(all_data['Family']>=8), 'FamilySizeGroup'] = 0
 
 ##### 特徴量エンジニアリング(敬称抽出)
 all_data['Title'] = all_data['Name'].map(lambda x: x.split(', ')[1].split('. ')[0])
@@ -106,7 +106,7 @@ all_data['Embarked'] = all_data['Embarked'].fillna('S')
 
 # ------------- 前処理 ---------------
 # 推定に使用する項目を指定
-all_data = all_data[['Survived','Pclass','Sex','Age','Fare','Embarked','Title','Family_label','Cabin_label','Ticket_label']]
+all_data = all_data[['Survived','Pclass','Sex','Age','Fare','Embarked','Title','FamilySizeGroup','Cabin_label','Ticket_label']]
 
 ####### 本番モデル用のOne-Hot Encoding
 all_data = pd.get_dummies(all_data)
