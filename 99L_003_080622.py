@@ -4,6 +4,7 @@ import numpy as np
 ##### データ読み込み
 train_data = pd.read_csv('/kaggle/input/competitions/titanic/train.csv')
 test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
+print('001 ', test_data.columns)
 
 ##### 前準備
 all_data = pd.concat([train_data, test_data], ignore_index=True)
@@ -104,21 +105,19 @@ all_data['Cabin_label']=all_data['Cabin'].str.get(0)
 ##### 欠損値をSで補完
 all_data['Embarked'] = all_data['Embarked'].fillna('S') 
 
-# ------------- 前処理 ---------------
-# 推定に使用する項目を指定
-all_data = all_data[['Survived','Pclass','Sex','Age','Fare','Embarked','Title','FamilySizeGroup','Cabin_label','Ticket_label']]
-
 ####### 本番モデル用のOne-Hot Encoding
-all_data = pd.get_dummies(all_data)
+all_data = pd.get_dummies(all_data, columns=['Survived','Pclass','Sex','Age','Fare','Embarked','Title','FamilySizeGroup','Cabin_label','Ticket_label'])
 
 ##### 元に戻す
-train_data = all_data[all_data['Survived'].notnull()]
-test_data  = all_data[all_data['Survived'].isnull()].drop('Survived',axis=1)
+train_data = all_data.iloc[:len(train_data)].copy()
+test_data  = all_data.iloc[len(train_data):].copy().drop('Survived',axis=1)
+print('002-1 ', all_data.columns)
+print('002-2 ', test_data.columns)
 
 ##### 学習データを準備
 X      = train_data.values[:,1:]
 y      = train_data.values[:,0].astype(int)
-test_x = test_data.values
+X_test = test_data.values
 
 ##### モデル作成・学習
 from sklearn.ensemble import RandomForestClassifier
@@ -158,7 +157,7 @@ X_selected = select.transform(X)
 print('X.shape={}, X_selected.shape={}'.format(X.shape, X_selected.shape))
 
 ##### 予測
-predictions = pipeline.predict(test_x)
+predictions = pipeline.predict(X_test)
 
 ##### 提出ファイル作成
 submission = pd.DataFrame({
