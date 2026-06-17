@@ -22,9 +22,9 @@ all_data['FamilySizeGroup'] = all_data['FamilySize'].apply(family_size_group)
 
 ##### 特徴量エンジニアリング(敬称抽出)
 all_data['Title'] = all_data['Name'].str.extract(r' ([A-Za-z]+)\.', expand=False)
-all_data['Title'] = all_data['Title'].replace(['Mlle', 'Ms'], 'Miss')
-all_data['Title'] = all_data['Title'].replace('Mme', 'Mrs')
-all_data['Title'] = all_data['Title'].replace(['Capt', 'Col', 'Countess', 'Don', 'Jonkheer', 'Lady', 'Major', 'Sir'],'Rare')
+all_data['Title'].replace(['Mlle', 'Ms'], 'Miss', inplace=True)
+all_data['Title'].replace(['Mme'], 'Mrs', inplace=True)
+all_data['Title'].replace(['Capt', 'Col', 'Countess', 'Don', 'Jonkheer', 'Lady', 'Major', 'Sir'],'Rare', inplace=True)
 
 ##### 特徴量エンジニアリング(Sexを数値化)
 all_data['Sex'] = all_data['Sex'].map({'male': 0, 'female': 1})
@@ -39,7 +39,7 @@ age_pred_data = all_data[['Age', 'Pclass', 'Sex', 'Fare', 'SibSp', 'Parch', 'Tit
 ##### ラベル特徴量をOne-Hotエンコーディング
 age_pred_data = pd.get_dummies(age_pred_data)
 
-##### Ageがわかっているデータに分離し、numpyに変換
+##### Ageがわかっているデータとわかってないデータに分離し、numpyに変換
 age_known  = age_pred_data[age_pred_data['Age'].notnull()].values
 age_unknown= age_pred_data[age_pred_data['Age'].isnull()].values
 
