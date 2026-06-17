@@ -94,13 +94,13 @@ model.fit(X, y)
 predictions = model.predict(X_test).astype(int)
 
 ##### 提出ファイル作成
-output = pd.DataFrame({
-    "PassengerId": test_data["PassengerId"],
+submission = pd.DataFrame({
+    "PassengerId": test_data['PassengerId'],
     "Survived": predictions
 })
 
 ##### 提出ファイル出力
-output.to_csv("submission-99R-001.csv", index=False)
+submission.to_csv("submission-99R-001.csv", index=False)
 
 ##### 完了
 print("submission-99R-001.csv を作成しました")
