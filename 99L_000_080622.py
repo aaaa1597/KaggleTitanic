@@ -95,7 +95,7 @@ df.loc[(df['TicketGroup']>=5) & (df['TicketGroup']<=8) | (df['TicketGroup']==1),
 df.loc[(df['TicketGroup']>=11), 'Ticket_label'] = 0
 
 ##### ------------- Cabin ----------------
-# Cabinの先頭文字を特徴量とする(欠損値は U )
+##### Cabinの先頭文字を特徴量とする(欠損値は U )
 df['Cabin'] = df['Cabin'].fillna('Unknown')
 df['Cabin_label']=df['Cabin'].str.get(0)
 
@@ -110,14 +110,14 @@ df = df[['Survived','Pclass','Sex','Age','Fare','Embarked','Title','FamilySizeGr
 ##### 本番モデル用のOne-Hot Encoding
 df = pd.get_dummies(df)
 
-##### データセットを trainとtestに分割
-train = df[df['Survived'].notnull()]
-test = df[df['Survived'].isnull()].drop('Survived',axis=1)
+##### 元に戻す
+train_data2= df[df['Survived'].notnull()]
+test_data2 = df[df['Survived'].isnull()].drop('Survived',axis=1)
 
-##### データフレームをnumpyに変換
-X = train.values[:,1:]  
-y = train.values[:,0].astype(int)
-test_x = test.values
+##### DataFrameをnumpyに型変換
+X      = train_data2.values[:,1:]
+y      = train_data2.values[:,0].astype(int)
+X_test = test_data2.values
 
 ##### モデル作成・学習
 from sklearn.ensemble import RandomForestClassifier
@@ -156,13 +156,14 @@ for i, j in enumerate(list_col):
 X_selected = select.transform(X)
 print('X.shape={}, X_selected.shape={}'.format(X.shape, X_selected.shape))
 
-PassengerId=test_data['PassengerId']
-
 ##### 予測
-predictions = pipeline.predict(test_x)
+predictions = pipeline.predict(X_test)
 
 ##### 提出ファイル作成
-submission = pd.DataFrame({"PassengerId": PassengerId, "Survived": predictions.astype(np.int32)})
+submission = pd.DataFrame({
+    "PassengerId": test_data['PassengerId'],
+    "Survived": predictions.astype(np.int32)
+})
 
 ##### 提出ファイル出力
 submission.to_csv("submission-99L_000_0.80622_000.csv", index=False)

@@ -4,7 +4,6 @@ import numpy as np
 ##### データ読み込み
 train_data = pd.read_csv('/kaggle/input/competitions/titanic/train.csv')
 test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
-print('001 ', test_data.columns)
 
 ##### 前準備
 all_data = pd.concat([train_data, test_data], ignore_index=True, sort=False)
@@ -108,15 +107,13 @@ all_data['Embarked'] = all_data['Embarked'].fillna('S')
 all_data = pd.get_dummies(all_data, columns=['Survived','Pclass','Sex','Age','Fare','Embarked','Title','FamilySizeGroup','Cabin_label','Ticket_label'])
 
 ##### 元に戻す
-train_data = all_data.iloc[:len(train_data)].copy()
-test_data  = all_data.iloc[len(train_data):].copy().drop('Survived',axis=1)
-print('002-1 ', all_data.columns)
-print('002-2 ', test_data.columns)
+train_data2= all_data.iloc[:len(train_data)].copy()
+test_data2 = all_data.iloc[len(train_data):].copy().drop('Survived',axis=1)
 
-##### 学習データを準備
-X      = train_data.values[:,1:]
-y      = train_data.values[:,0].astype(int)
-X_test = test_data.values
+##### DataFrameをnumpyに型変換
+X      = train_data2.values[:,1:]
+y      = train_data2.values[:,0].astype(int)
+X_test = test_data2.values
 
 ##### モデル作成・学習
 from sklearn.ensemble import RandomForestClassifier
