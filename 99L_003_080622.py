@@ -103,8 +103,12 @@ all_data['Cabin_label']=all_data['Cabin'].str.get(0)
 ##### 欠損値をSで補完
 all_data['Embarked'] = all_data['Embarked'].fillna('S') 
 
+##### ------------- 前処理 ---------------
+# 推定に使用する項目を指定
+all_data = all_data[['Survived','Pclass','Sex','Age','Fare','Embarked','Title','FamilySizeGroup','Cabin_label','Ticket_label']]
+
 ##### 本番モデル用のOne-Hot Encoding
-all_data = pd.get_dummies(all_data, columns=['Survived','Pclass','Sex','Age','Fare','Embarked','Title','FamilySizeGroup','Cabin_label','Ticket_label'])
+all_data = pd.get_dummies(all_data)
 
 ##### 元に戻す
 train_data2= all_data.iloc[:len(train_data)].copy()
@@ -162,7 +166,7 @@ submission = pd.DataFrame({
 })
 
 ##### 提出ファイル出力
-submission.to_csv("submission-99L-0.80622_001.csv", index=False)
+submission.to_csv("submission-99L_003_0.80622_000.csv", index=False)
 
 ##### 完了
-print("submission-99L-0.80622_001.csv を作成しました")
+print("submission-99L_000_0.80622_003.csv を作成しました")
