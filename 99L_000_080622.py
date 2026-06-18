@@ -9,10 +9,10 @@ test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
 df = pd.concat([train_data, test_data], ignore_index=True, sort=False)
 
 ##### 特徴量エンジニアリング(家族人数)
-df['Family']=df['SibSp']+df['Parch']+1
-df.loc[(df['Family']>=2) & (df['Family']<=4), 'FamilySizeGroup'] = 2
-df.loc[(df['Family']>=5) & (df['Family']<=7) | (df['Family']==1), 'FamilySizeGroup'] = 1  # == に注意
-df.loc[(df['Family']>=8), 'FamilySizeGroup'] = 0
+df['FamilySize']=df['SibSp']+df['Parch']+1
+df.loc[(df['FamilySize']>=2) & (df['FamilySize']<=4), 'FamilySizeGroup'] = 2
+df.loc[(df['FamilySize']>=5) & (df['FamilySize']<=7) | (df['FamilySize']==1), 'FamilySizeGroup'] = 1  # == に注意
+df.loc[(df['FamilySize']>=8), 'FamilySizeGroup'] = 0
 
 ##### 特徴量エンジニアリング(敬称抽出)
 df['Title'] = df['Name'].map(lambda x: x.split(', ')[1].split('. ')[0])
