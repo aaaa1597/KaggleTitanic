@@ -32,22 +32,22 @@ df['Fare']=df['Fare'].fillna(fare)
 age_pred_data = df[['Age', 'Pclass', 'Sex', 'SibSp', 'Parch']]
 
 ##### ラベル特徴量をOne-Hotエンコーディング
-age_pred_data=pd.get_dummies(age_pred_data)
+age_pred_data = pd.get_dummies(age_pred_data)
 
 ##### Ageがわかっているデータとわかってないデータに分離し、numpyに変換
 age_known  = age_pred_data[age_pred_data['Age'].notnull()].values
 age_unknown= age_pred_data[age_pred_data['Age'].isnull()].values
 
 ##### 学習用データをX_age, y_ageに分離
-X = age_known[:, 1:] # Age以外の特徴量
-y = age_known[:, 0]  # Age(目的変数)
+X_age = age_known[:, 1:] # Age以外の特徴量
+y_age = age_known[:, 0]  # Age(目的変数)
 
 ##### ランダムフォレスト(回帰)で推定モデルを構築
 from sklearn.ensemble import RandomForestRegressor
 rfr = RandomForestRegressor(random_state=0, n_estimators=100, n_jobs=-1)
-rfr.fit(X, y)
+rfr.fit(X_age, y_age)
 
-# 推定モデルを使って、テストデータのAgeを予測し、補完
+##### 欠損値のAge予測実行
 predictedAges = rfr.predict(age_unknown[:, 1::])
 
 ##### 元のall_dataに補完
