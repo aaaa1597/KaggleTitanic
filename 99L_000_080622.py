@@ -48,10 +48,10 @@ rfr = RandomForestRegressor(random_state=0, n_estimators=100, n_jobs=-1)
 rfr.fit(X_age, y_age)
 
 ##### 欠損値のAge予測実行
-predictedAges = rfr.predict(age_unknown[:, 1::])
+predicted_ages = rfr.predict(age_unknown[:, 1:])
 
 ##### 元のall_dataに補完
-df.loc[(df.Age.isnull()), 'Age'] = predictedAges 
+df.loc[df['Age'].isnull(), 'Age'] = predicted_ages
 #####################AgeをRandomForestRegressorで推定 ここまで
 
 #################### Surname ここから
