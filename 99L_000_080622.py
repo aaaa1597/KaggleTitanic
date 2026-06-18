@@ -29,14 +29,14 @@ df['Fare']=df['Fare'].fillna(fare)
 
 ##################### AgeをRandomForestRegressorで推定 ここから
 ##### 推定に使用する項目を指定
-age_df = df[['Age', 'Pclass', 'Sex', 'SibSp', 'Parch']]
+age_pred_data = df[['Age', 'Pclass', 'Sex', 'SibSp', 'Parch']]
 
 ##### ラベル特徴量をOne-Hotエンコーディング
-age_df=pd.get_dummies(age_df)
+age_pred_data=pd.get_dummies(age_pred_data)
 
 ##### Ageがわかっているデータとわかってないデータに分離し、numpyに変換
-age_known  = age_df[age_df['Age'].notnull()].values
-age_unknown= age_df[age_df['Age'].isnull()].values
+age_known  = age_pred_data[age_pred_data['Age'].notnull()].values
+age_unknown= age_pred_data[age_pred_data['Age'].isnull()].values
 
 ##### 学習用データをX_age, y_ageに分離
 X = age_known[:, 1:] # Age以外の特徴量
