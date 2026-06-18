@@ -9,7 +9,7 @@ test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
 df = pd.concat([train_data, test_data], ignore_index=True, sort=False)
 
 ##### 特徴量エンジニアリング(家族人数)
-df['FamilySize']=df['SibSp']+df['Parch']+1
+df['FamilySize'] = df['SibSp'] + df['Parch'] + 1
 df.loc[(df['FamilySize']>=2) & (df['FamilySize']<=4), 'FamilySizeGroup'] = 2
 df.loc[(df['FamilySize']>=5) & (df['FamilySize']<=7) | (df['FamilySize']==1), 'FamilySizeGroup'] = 1  # == に注意
 df.loc[(df['FamilySize']>=8), 'FamilySizeGroup'] = 0
@@ -29,18 +29,18 @@ df['Fare']=df['Fare'].fillna(fare)
 
 ##################### AgeをRandomForestRegressorで推定 ここから
 ##### 推定に使用する項目を指定
-age_df = df[['Age', 'Pclass','Sex','Parch','SibSp']]
+age_df = df[['Age', 'Pclass', 'Sex', 'SibSp', 'Parch']]
 
 ##### ラベル特徴量をOne-Hotエンコーディング
 age_df=pd.get_dummies(age_df)
 
 ##### Ageがわかっているデータとわかってないデータに分離し、numpyに変換
-known_age = age_df[age_df.Age.notnull()].values  
-unknown_age = age_df[age_df.Age.isnull()].values
+age_known  = age_df[age_df['Age'].notnull()].values
+age_unknown= age_df[age_df['Age'].isnull()].values
 
 ##### 学習用データをX_age, y_ageに分離
-X = known_age[:, 1:] # Age以外の特徴量
-y = known_age[:, 0]  # Age(目的変数)
+X = age_known[:, 1:] # Age以外の特徴量
+y = age_known[:, 0]  # Age(目的変数)
 
 ##### ランダムフォレスト(回帰)で推定モデルを構築
 from sklearn.ensemble import RandomForestRegressor
@@ -48,7 +48,7 @@ rfr = RandomForestRegressor(random_state=0, n_estimators=100, n_jobs=-1)
 rfr.fit(X, y)
 
 # 推定モデルを使って、テストデータのAgeを予測し、補完
-predictedAges = rfr.predict(unknown_age[:, 1::])
+predictedAges = rfr.predict(age_unknown[:, 1::])
 
 ##### 元のall_dataに補完
 df.loc[(df.Age.isnull()), 'Age'] = predictedAges 
