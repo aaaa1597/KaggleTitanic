@@ -64,7 +64,7 @@ labels = ['Child', 'Teen', 'Adult', 'Mid', 'Senior']
 bins = [0, 12, 18, 31, 60, 100]
 all_data['AgeBin'] = pd.cut(all_data['Age'], bins=bins, labels=labels, right=False).astype(str)
 
-####### 本番モデル用のOne-Hot Encoding
+##### 本番モデル用のOne-Hot Encoding
 all_data = pd.get_dummies(all_data, columns=['Title', 'FamilySizeGroup', 'AgeBin'])
 
 ##### 元に戻す
