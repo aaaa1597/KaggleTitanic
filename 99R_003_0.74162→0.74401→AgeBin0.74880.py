@@ -8,7 +8,7 @@ train_data = pd.read_csv('/kaggle/input/competitions/titanic/train.csv')
 test_data  = pd.read_csv('/kaggle/input/competitions/titanic/test.csv')
 
 ##### 前準備
-all_data = pd.concat([train_data, test_data], ignore_index=True)
+all_data = pd.concat([train_data, test_data], ignore_index=True, sort=False)
 
 ##### 家族人数のグループ分け
 def family_size_group(size):
@@ -22,14 +22,15 @@ all_data['FamilySizeGroup'] = all_data['FamilySize'].apply(family_size_group)
 
 ##### 特徴量エンジニアリング(敬称抽出)
 all_data['Title'] = all_data['Name'].str.extract(r' ([A-Za-z]+)\.', expand=False)
-all_data['Title'].replace(['Mlle', 'Ms'], 'Miss', inplace=True)
-all_data['Title'].replace(['Mme'], 'Mrs', inplace=True)
-all_data['Title'].replace(['Capt', 'Col', 'Countess', 'Don', 'Jonkheer', 'Lady', 'Major', 'Sir'],'Rare', inplace=True)
+all_data['Title'] = all_data['Title'].replace(['Mlle', 'Ms'], 'Miss')
+all_data['Title'] = all_data['Title'].replace(['Mme'], 'Mrs')
+all_data['Title'] = all_data['Title'].replace(['Capt', 'Col', 'Countess', 'Don', 'Jonkheer', 'Lady', 'Major', 'Sir'],'Rare')
 
 ##### 特徴量エンジニアリング(Sexを数値化)
 all_data['Sex'] = all_data['Sex'].map({'male': 0, 'female': 1})
 
-##### 特徴量エンジニアリング(Fareの欠損値補完(これはTestデータに1件だけなので中央値で。特にこだわりなし))
+##### 特徴量エンジニアリング(Fareの欠損値補完)
+# これはTestデータに1件だけなので中央値で。特にこだわりなし
 all_data['Fare'] = all_data['Fare'].fillna(all_data['Fare'].median())
 
 ##################### AgeをRandomForestRegressorで推定 ここから
@@ -100,7 +101,7 @@ submission = pd.DataFrame({
 })
 
 ##### 提出ファイル出力
-submission.to_csv("submission-99R-001.csv", index=False)
+submission.to_csv("submission-99R_003_-0.74880_001.csv", index=False)
 
 ##### 完了
-print("submission-99R-001.csv を作成しました")
+print("submission-99R-003_0.74880_001.csv を作成しました")
