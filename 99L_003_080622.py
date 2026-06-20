@@ -123,7 +123,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import cross_validate
 
-# 採用する特徴量を25個から20個に絞り込む
+##### 採用する特徴量を20個に絞り込む
 from sklearn.feature_selection import SelectKBest
 select = SelectKBest(k = 20)
 
