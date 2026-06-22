@@ -112,6 +112,8 @@ test_data2 = all_data.iloc[len(train_data):].copy().drop('Survived',axis=1)
 
 ##### 特徴量を選択
 features = [col for col in train_data2.columns if col not in ['PassengerId', 'Survived', 'Name', 'SibSp', 'Parch', 'Ticket', 'Cabin', 'FamilySize', 'Surname', 'FamilyGroup', 'TicketGroup']]
+# print(features)
+# ['Pclass', 'Age', 'Fare', 'FamilySizeGroup', 'Ticket_label', 'Sex_female', 'Sex_male', 'Embarked_C', 'Embarked_Q', 'Embarked_S', 'Title_Master', 'Title_Miss', 'Title_Mr', 'Title_Mrs', 'Title_Officer', 'Title_Royalty', 'Cabin_label_A', 'Cabin_label_B', 'Cabin_label_C', 'Cabin_label_D', 'Cabin_label_E', 'Cabin_label_F', 'Cabin_label_G', 'Cabin_label_T', 'Cabin_label_U']
 
 ##### 学習データと正解と試験データを取得
 X      = train_data2[features]
