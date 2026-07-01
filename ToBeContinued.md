@@ -1,5 +1,8 @@
 # 続き
 
+# やったことリスト
+- 2026/06/27(土) 18:51 初回提出 CV:0.8350 Public:0.77272 EDA→特徴量エンジニアリング(敬称抽出,Age補完,家族数追加,単身追加,Fare補完,Deck追加)→Encoding(One-Hot('Sex','Embarked','Title','Deck'))→モデル検証(LogisticRegression,RandomForest,XGBoost,LightGBM)
+
 ## 2026/06/29(月) 20:54
 
 ### github,medium, DEV.to,zenn,noteのアカウント名変更
