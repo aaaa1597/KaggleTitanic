@@ -4,6 +4,35 @@
 - 2026/06/27(土) 18:51 初回提出 CV:0.8350 Public:0.77272 EDA→特徴量エンジニアリング(敬称抽出,Age補完,家族数追加,単身追加,Fare補完,Deck追加)→Encoding(One-Hot('Sex','Embarked','Title','Deck'))→モデル検証(LogisticRegression,RandomForest,XGBoost,LightGBM)
 - 2026/07/01(水) 22:35 特徴量組み合わせ・詳細化(1-1, 1-2, 1-3)を追加して検証。CVスコアが最高 0.8451 (LightGBM) となり、前回の最高 CV:0.8507 (Logistic Regression) を下回ったため、提出は見送り。
 - 2026/07/02(木) 20:21 同一チケットに基づく Fare (運賃) の一人あたり化とグループ分析を検証。最高 CV:0.8485 (LightGBM / Fare_per_personのみ時) となり、ベースラインの最高精度 0.8507 を超えられず提出は見送り。
+- 2026/07/02(木) 20:31 年齢 (Age) 欠損値補完の高度化を検証。Logistic Regression にて CV:0.8519、Public Score:0.78947 をマークし最高精度を更新したばい。
+
+## 2026/07/02(木) 20:31
+### 手順③: 実行
+
+ユーザーから自動承認をもらったけん、計画通り特徴量「年齢 (Age) 欠損値補完の高度化 (機械学習による予測補完)」を追加して検証を実行したばい。
+
+#### 1. 実行内容
+- これまで敬称(`Title`)ごとの中央値で補完しとった `Age` に対し、`RandomForestRegressor` を用いて他の特徴量(`Pclass`, `Sex`, `SibSp`, `Parch`, `Fare`, `Embarked`, `Title`, `Deck`)から欠損値を予測・補完するように `notebooks/titanic_eda.ipynb` を変更したばい。
+
+#### 2. 検証結果 (5-Fold CV Accuracy)
+- **Logistic Regression (ベースライン)**: 0.8507
+- **Logistic Regression (変更後)**: **0.8519** (向上！最高CVを更新したばい)
+- **Random Forest (ベースライン)**: 0.8204
+- **Random Forest (変更後)**: 0.8249 (向上)
+- **XGBoost (ベースライン)**: 0.8215
+- **XGBoost (変更後)**: 0.8226 (向上)
+- **LightGBM (ベースライン)**: 0.8496
+- **LightGBM (変更後)**: 0.8485 (微減)
+
+#### 3. 考察と提出結果
+- **考察**:
+  - 年齢を単なる敬称ごとの代表値(中央値)にするのではなく、他の属性情報も加味してよりきめ細かく予測・補完したことで、乗客の正確な年齢構成が復元され、モデリングの予測能力向上に寄与したと考えられるばい。特にロジスティック回帰で CV: 0.8519 を記録し、過去最高のCVスコアを更新したばい。
+- **提出結果**:
+  - CVスコアが前回最高(0.8507)を上回ったため、テストデータに対する予測を行い、提出用CSV(`submissions/submission.csv`)を作成し、Kaggle CLIで提出したばい。
+  - **Public Score**: **0.78947** (前回最高 0.78708 から向上！)
+- **アウトプット**:
+  - ノートブックを [titanic_eda_20260702_2031_age_imputation.ipynb](file:///d:/BizOwn/000_Biw2/51_googleantigravity/1st_/notebooks/titanic_eda_20260702_2031_age_imputation.ipynb) として別名保存し、GitHubにコミットしたばい。
+  - 成果を共有するために、Zenn記事 [20260702_2031_age_imputation.md](file:///d:/BizOwn/000_Biw2/51_googleantigravity/1st_/zenn_articles/articles/20260702_2031_age_imputation.md) を作成・コミットしたばい。
 
 ## 2026/07/02(木) 20:30
 ### 手順②: 実行計画を提示
