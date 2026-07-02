@@ -3,6 +3,84 @@
 # やったことリスト
 - 2026/06/27(土) 18:51 初回提出 CV:0.8350 Public:0.77272 EDA→特徴量エンジニアリング(敬称抽出,Age補完,家族数追加,単身追加,Fare補完,Deck追加)→Encoding(One-Hot('Sex','Embarked','Title','Deck'))→モデル検証(LogisticRegression,RandomForest,XGBoost,LightGBM)
 - 2026/07/01(水) 22:35 特徴量組み合わせ・詳細化(1-1, 1-2, 1-3)を追加して検証。CVスコアが最高 0.8451 (LightGBM) となり、前回の最高 CV:0.8507 (Logistic Regression) を下回ったため、提出は見送り。
+- 2026/07/02(木) 20:21 同一チケットに基づく Fare (運賃) の一人あたり化とグループ分析を検証。最高 CV:0.8485 (LightGBM / Fare_per_personのみ時) となり、ベースラインの最高精度 0.8507 を超えられず提出は見送り。
+
+## 2026/07/02(木) 20:30
+### 手順②: 実行計画を提示
+
+ユーザーから施策2「年齢 (Age) 欠損値補完の高度化 (機械学習による予測補完)」の実行依頼を受けたばい。
+以下のように実行計画を策定したけん提示するね。
+
+#### 1. 実行内容の説明
+- **目的**: これまでの敬称(`Title`)ごとの中央値補完に代わり、他の特徴量(`Pclass`, `Sex`, `SibSp`, `Parch`, `Fare`, `Embarked`, `Title`, `Deck`)も交えて `RandomForestRegressor` で `Age` の欠損値を予測・補完するばい。
+- **期待効果**: クラスや同伴家族数によって異なる詳細な年齢層を反映し、年齢が関わる生存予測精度を高めるばい。
+- **実装内容**:
+  - 前回の特徴量(`Fare_per_person`, `Ticket_Prefix`)は一旦削除し、ベースライン特徴量の構成に戻した上で `Age` の予測補完を組み込むばい。
+
+#### 2. CVスコアによるモデル評価とアウトプット計画
+- 追加した特徴量を用いて、5-Fold CVでモデル(Logistic Regression, RandomForest, XGBoost, LightGBM)を再評価するばい。
+- **CVスコアが向上した場合(前回の最高CV: 0.8507 を上回った場合)**:
+  - テストデータの予測を行い、提出用CSV(`submissions/submission.csv`)を作成し、Kaggle CLIで提出するばい。
+  - 提出結果の Public Score を確認して、この `ToBeContinued.md` に追記するばい。
+  - 成果を共有するために、`zenn_articles/articles` 配下に Zenn 記事(ファイル名: `yyyymmdd_HHMM_age_imputation.md`)を作成するばい。
+  - 実行後のノートブックを `notebooks/titanic_eda_yyyymmdd_HHMM_age_imputation.ipynb` として別名保存し、GitHubにコミットするばい。
+- **CVスコアが向上しなかった場合**:
+  - 提出は見送り、スコア低下の原因について考察し、結果と考察をこの `ToBeContinued.md` に追記するばい。
+
+## 2026/07/02(木) 20:21
+### 手順③: 実行
+
+ユーザーから自動承認をもらったけん、計画通り特徴量「同一チケットに基づく Fare の一人あたり化とグループ分析」を追加して検証を実行したばい。
+
+#### 1. 実行内容
+- 提案した2つの特徴量を `notebooks/titanic_eda.ipynb` に追加して検証したばい。
+  - **1-1. 一人あたりの運賃 (`Fare_per_person`)**: `Ticket`ごとの出現回数で合計 `Fare` を割り、乗客ごとの実質的な運賃を算出。
+  - **1-2. チケットプレフィックス (`Ticket_Prefix`)**: `Ticket`から記号を除外して正規化したアルファベット文字列（プレフィックス）を抽出し、One-Hot Encoding に追加。
+
+#### 2. 検証結果 (5-Fold CV Accuracy)
+- **Logistic Regression (前回最高モデル / ベースライン)**: 0.8507
+- **Logistic Regression (新規特徴量すべて追加)**: 0.8384 (低下)
+- **Logistic Regression (Fare_per_personのみ追加 / Prefixなし)**: 0.8429 (低下)
+- **Random Forest (ベースライン)**: 0.8204
+- **Random Forest (新規特徴量すべて追加)**: 0.8282 (向上！)
+- **XGBoost (ベースライン)**: 0.8215
+- **XGBoost (新規特徴量すべて追加)**: 0.8226 (微増)
+- **LightGBM (ベースライン)**: 0.8496
+- **LightGBM (新規特徴量すべて追加)**: 0.8462 (低下)
+- **LightGBM (Fare_per_personのみ追加 / Prefixなし)**: **0.8485** (微減)
+
+#### 3. 考察と今後の方針
+- **ロジスティック回帰のスコア低下**:
+  - `Ticket_Prefix` を One-Hot Encoding したことで、カテゴリの種類が多く（特徴量数が 56 個に増加）、疎な特徴量が増えた結果、過学習を起こした可能性が高いばい。
+  - また、`Fare_per_person` のみを追加した場合でも Logistic Regression のスコアは 0.8429 に低下したばってん、これは元の `Fare` と `Fare_per_person` が高い多重共線性を持ち、線形モデルの安定性を損なったためと考えられるやね。
+- **決定木系モデルへの影響**:
+  - `Random Forest` や `XGBoost` ではスコアの向上が見られたばい。決定木系モデルは非線形な関係を捉えるのが得意なため、一人あたり化された運賃やプレフィックス情報をある程度有効に活用できたと言えるばい。
+  - しかし、全体の最高精度である `0.8507` (Logistic Regressionベースライン) には届かなかったばい。
+- **結論**:
+  - 今回の検証では最高CVスコアが 0.8485 (LightGBM) に留まり、従来の最高精度 0.8507 を超えられなかったため、計画通り今回は Kaggle への提出、別名ノートブックのコミット、Zenn記事作成は見送るばい。
+
+## 2026/07/02(木) 20:18
+### 手順②: 実行計画を提示
+
+ユーザーから、まだ実行しとらんかった施策「1. 同一チケットに基づく Fare (運賃) の一人あたり化とグループ分析」の実行依頼を受けたばい。
+以下のように実行計画を策定したけん提示するね。
+
+#### 1. 実行内容の説明
+- **目的**: チケット番号(`Ticket`)ごとに運賃を頭割りした一人あたり運賃(`Fare_per_person`)と、チケットの文字列から抽出した `Ticket_Prefix` を特徴量として追加し、乗客の正確な社会的地位とグループの傾向をモデルに教えるばい。
+- **期待効果**: チケットが複数人の合計金額になっている歪みを解消することで、特に運賃が重要な手がかりとなるモデルの分類精度向上が期待できるばい。
+- **実装内容**:
+  - `Fare_per_person` の追加：`Ticket` ごとの出現数をカウントし、`Fare / 出現数` で算出するばい。
+  - `Ticket_Prefix` の追加：`Ticket` 文字列からアルファベット部を抽出し、記号を削除・小文字化してカテゴリ変数にするばい。
+
+#### 2. CVスコアによるモデル評価とアウトプット計画
+- 追加した特徴量を用いて、5-Fold CVでモデル(Logistic Regression, RandomForest, XGBoost, LightGBM)を再評価するばい。
+- **CVスコアが向上した場合(前回の最高CV: 0.8507 を上回った場合)**:
+  - テストデータの予測を行い、提出用CSV(`submissions/submission.csv`)を作成し、Kaggle CLIで提出するばい。
+  - 提出結果の Public Score を確認して、この `ToBeContinued.md` に追記するばい。
+  - 成果を共有するために、`zenn_articles/articles` 配下に Zenn 記事(ファイル名: `yyyymmdd_HHMM_ticket_features.md`)を作成するばい。
+  - 実行後のノートブックを `notebooks/titanic_eda_yyyymmdd_HHMM_ticket_features.ipynb` として別名保存し、GitHubにコミットするばい。
+- **CVスコアが向上しなかった場合**:
+  - 提出は見送り、スコア低下の原因について考察し、結果と考察をこの `ToBeContinued.md` に追記するばい。
 
 ## 2026/07/01(水) 22:40
 ### 手順①: Kaggle Titanicスコアアップ施策 of the classの提案タスク(前処理・特徴量エンジニアリング第2弾)
